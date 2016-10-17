@@ -1,12 +1,11 @@
 package view;
 
+import controller.CacaNiquelController;
 import exceptions.InvalidMapException;
 import java.util.Map;
-import java.util.Random;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import model.IconGenerator;
 import util.Constantes;
@@ -19,8 +18,9 @@ import util.Constantes;
 /**
  *
  * @author ETEC
+ * 
  */
-public class Principal extends javax.swing.JFrame {
+public class CacaNiquelView extends javax.swing.JFrame {
 
     private int moeda;
     private int pontos;
@@ -35,18 +35,25 @@ public class Principal extends javax.swing.JFrame {
     private IconGenerator iconGenerator;
     private Map<Integer, ImageIcon> mapaIcones = new TreeMap<>();
 
-    public Principal() {
+    private CacaNiquelController cacaNiquelController = null;
+
+    public CacaNiquelView() {
+
         initComponents();
 
         Map<Integer, ImageIcon> mapa = new TreeMap<>();
+
         try {
 
-            this.iconGenerator = new IconGenerator(loadMap(mapa));
+            this.cacaNiquelController = new CacaNiquelController(this);
+
+            this.iconGenerator = new IconGenerator(cacaNiquelController.carregarMapaImagens(mapa));
+
             mapaIcones = iconGenerator.getMapaArquivosIcones();
 
-            btnValor1.setIcon(mapaIcones.get(2));
-            btnValor2.setIcon(mapaIcones.get(2));
-            btnValor3.setIcon(mapaIcones.get(2));
+            btnValor1.setIcon(mapaIcones.get(Constantes.IMAGEM_INICIAL));
+            btnValor2.setIcon(mapaIcones.get(Constantes.IMAGEM_INICIAL));
+            btnValor3.setIcon(mapaIcones.get(Constantes.IMAGEM_INICIAL));
 
         } catch (InvalidMapException ex) {
 
@@ -245,41 +252,12 @@ public class Principal extends javax.swing.JFrame {
         isValor2Concluido = Boolean.FALSE;
         isValor3Concluido = Boolean.FALSE;
 
-        getThreadRodarBtn1().start();
-        getThreadRodarBtn2().start();
-        getThreadRodarBtn3().start();
-        getThreadChecarJogo().start();
-
-
+        cacaNiquelController.getThreadRodarBtn1().start();
+        cacaNiquelController.getThreadRodarBtn2().start();
+        cacaNiquelController.getThreadRodarBtn3().start();
+        cacaNiquelController.getThreadChecarJogo().start();
 
     }//GEN-LAST:event_btnApostarActionPerformed
-
-    private Thread getThreadChecarJogo() {
-
-        return new Thread() {
-
-            @Override
-            public void run() {
-                System.out.println("T");
-                while (!isValor1Concluido || !isValor2Concluido || !isValor3Concluido) {
-                    try {
-                        //intervalo para sincronização de threads
-                        Thread.sleep(5);
-                    } catch (InterruptedException ex) {
-                        //não há necessidade de tratarmos este erro
-                    }
-                }
-
-                if (isValor1Concluido && isValor2Concluido && isValor3Concluido) {
-                    System.out.println("Conferindo Jogo:");
-                    checarJogo();
-
-                }
-
-            }
-
-        };
-    }
 
     private void btnJogarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJogarActionPerformed
         moeda = 20;
@@ -324,284 +302,127 @@ public class Principal extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CacaNiquelView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CacaNiquelView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CacaNiquelView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CacaNiquelView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Principal().setVisible(true);
+                new CacaNiquelView().setVisible(true);
             }
         });
     }
 
-    private void checarJogo() {
+    public void atualizaImagemBotao(JButton botao, ImageIcon imagem) {
 
-        int a = this.i1;
-        int b = this.i2;
-        int c = this.i3;
-
-        System.out.println(">>> A[" + a + "], B[" + b + "], C[" + c + "]");
-
-        if ((a == 7) && (b == 7) && (c == 7)) {
-            moeda = moeda + 100;
-            pontos = pontos + 100;
-            JOptionPane.showMessageDialog(rootPane, "Parabéns, Você é o vencedor");
-            jLabel2.setText(String.valueOf(moeda));
-            jLabel4.setText(String.valueOf(pontos));
-
-        } else if (((a == 7) && (b == 7)) || ((a == 7) && (c == 7)) || ((b == 7) && (c == 7))) {
-            moeda = moeda + 2;
-            pontos = pontos + 2;
-            jLabel2.setText(String.valueOf(moeda));
-            jLabel4.setText(String.valueOf(pontos));
-        } else if ((a == 7) || (b == 7) || (c == 7)) {
-            moeda = moeda + 1;
-            pontos = pontos + 1;
-            jLabel2.setText(String.valueOf(moeda));
-            jLabel4.setText(String.valueOf(pontos));
-        } else if ((a != 7) && (b != 7) && (c != 7)) {
-            moeda = moeda - 1;
-            jLabel2.setText(String.valueOf(moeda));
-            jLabel4.setText(String.valueOf(pontos));
-            if ((moeda == 0)) {
-                JOptionPane.showMessageDialog(rootPane, "Você perdeu!");
-                btnApostar.setEnabled(false);
-                btnJogar.setEnabled(false);
-                btnSair.setEnabled(false);
-                btnValor1.setEnabled(false);
-            }
-
-        }
+        botao.setIcon(imagem);
+        botao.repaint();
 
     }
 
-    private Thread getThreadRodarBtn1() {
-        return new Thread() {
-            @Override
-            public void run() {
-
-                int indice = (int) (Math.random() * 100);
-                System.out.println(indice);
-                try {
-                    do {
-                        for (Map.Entry<Integer, ImageIcon> entry : iconGenerator.getMapaArquivosIcones().entrySet()) {
-                            try {
-
-                                btnValor1.setIcon(entry.getValue());
-                                btnValor1.repaint();
-
-                                if (indice > 90) {
-                                    Thread.sleep(40);
-                                } else if (indice > 80) {
-                                    Thread.sleep(70);
-                                } else if (indice > 70) {
-                                    Thread.sleep(100);
-                                } else if (indice > 60) {
-                                    Thread.sleep(130);
-                                } else if (indice > 50) {
-                                    Thread.sleep(170);
-                                } else if (indice > 40) {
-                                    Thread.sleep(200);
-                                } else if (indice > 30) {
-                                    Thread.sleep(230);
-                                } else if (indice > 20) {
-                                    Thread.sleep(250);
-                                } else if (indice > 10) {
-                                    Thread.sleep(300);
-                                } else if (indice > 7) {
-                                    Thread.sleep(310);
-                                } else if (indice > 5) {
-                                    Thread.sleep(400);
-                                }
-
-                                indice--;
-                                if (indice == 0) {
-                                    i1 = (entry.getKey() + 1);
-                                    isValor1Concluido = Boolean.TRUE;
-                                    System.out.println(i1 + "- " + isValor1Concluido);
-                                    break;
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    } while (indice > 0);
-
-                } catch (InvalidMapException ex) {
-                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        };
+    public int getMoeda() {
+        return moeda;
     }
 
-    private Thread getThreadRodarBtn2() {
-        return new Thread() {
-            @Override
-            public void run() {
-
-                int indice = (int) (Math.random() * 100);
-                System.out.println(indice);
-                try {
-                    do {
-                        for (Map.Entry<Integer, ImageIcon> entry : iconGenerator.getMapaArquivosIcones().entrySet()) {
-                            try {
-
-                                btnValor2.setIcon(entry.getValue());
-                                btnValor2.repaint();
-
-                                if (indice > 90) {
-                                    Thread.sleep(40);
-                                } else if (indice > 80) {
-                                    Thread.sleep(70);
-                                } else if (indice > 70) {
-                                    Thread.sleep(100);
-                                } else if (indice > 60) {
-                                    Thread.sleep(130);
-                                } else if (indice > 50) {
-                                    Thread.sleep(170);
-                                } else if (indice > 40) {
-                                    Thread.sleep(200);
-                                } else if (indice > 30) {
-                                    Thread.sleep(230);
-                                } else if (indice > 20) {
-                                    Thread.sleep(250);
-                                } else if (indice > 10) {
-                                    Thread.sleep(300);
-                                } else if (indice > 7) {
-                                    Thread.sleep(310);
-                                } else if (indice > 5) {
-                                    Thread.sleep(400);
-                                }
-
-                                indice--;
-                                if (indice == 0) {
-                                    i2 = (entry.getKey() + 1);
-                                    isValor2Concluido = Boolean.TRUE;
-                                    System.out.println(i2 + "- " + isValor2Concluido);
-                                    break;
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    } while (indice > 0);
-
-                } catch (InvalidMapException ex) {
-                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        };
+    public int getPontos() {
+        return pontos;
     }
 
-    private Thread getThreadRodarBtn3() {
-        return new Thread() {
-            @Override
-            public void run() {
-
-                int indice = (int) (Math.random() * 100);
-                System.out.println(indice);
-                try {
-                    do {
-                        for (Map.Entry<Integer, ImageIcon> entry : iconGenerator.getMapaArquivosIcones().entrySet()) {
-                            try {
-
-                                btnValor3.setIcon(entry.getValue());
-                                btnValor3.repaint();
-
-                                if (indice > 90) {
-                                    Thread.sleep(40);
-                                } else if (indice > 80) {
-                                    Thread.sleep(70);
-                                } else if (indice > 70) {
-                                    Thread.sleep(100);
-                                } else if (indice > 60) {
-                                    Thread.sleep(130);
-                                } else if (indice > 50) {
-                                    Thread.sleep(170);
-                                } else if (indice > 40) {
-                                    Thread.sleep(200);
-                                } else if (indice > 30) {
-                                    Thread.sleep(230);
-                                } else if (indice > 20) {
-                                    Thread.sleep(250);
-                                } else if (indice > 10) {
-                                    Thread.sleep(300);
-                                } else if (indice > 7) {
-                                    Thread.sleep(310);
-                                } else if (indice > 5) {
-                                    Thread.sleep(400);
-                                }
-
-                                indice--;
-                                if (indice == 0) {
-                                    i3 = (entry.getKey() + 1);
-                                    isValor3Concluido = Boolean.TRUE;
-                                    System.out.println(i2 + "- " + isValor3Concluido);
-                                    break;
-                                }
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    } while (indice > 0);
-
-                } catch (InvalidMapException ex) {
-                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        };
+    public void setMoeda(int moeda) {
+        this.moeda = moeda;
     }
 
-    private Map<Integer, ImageIcon> loadMap(Map<Integer, ImageIcon> mapa) throws InvalidMapException {
+    public void setPontos(int pontos) {
+        this.pontos = pontos;
+    }
 
-        if (mapa != null) {
+    public int getI1() {
+        return i1;
+    }
 
-            for (int i = 0; i <= 6; i++) {
+    public int getI2() {
+        return i2;
+    }
 
-                switch (i) {
+    public int getI3() {
+        return i3;
+    }
 
-                    case 0:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_0)));
-                        break;
-                    case 1:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_1)));
-                        break;
-                    case 2:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_2)));
-                        break;
-                    case 3:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_3)));
-                        break;
-                    case 4:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_4)));
-                        break;
-                    case 5:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_5)));
-                        break;
-                    case 6:
-                        mapa.put(i, new ImageIcon(getClass().getClassLoader().getResource(Constantes.PATH_FILE_6)));
-                        break;
-                }
+    public void setI1(int i1) {
+        this.i1 = i1;
+    }
 
-            }
-        } else {
-            throw new InvalidMapException("Mapa nulo, impossível preencher");
-        }
+    public void setI2(int i2) {
+        this.i2 = i2;
+    }
 
-        return mapa;
+    public void setI3(int i3) {
+        this.i3 = i3;
+    }
+
+    public boolean isIsValor1Concluido() {
+        return isValor1Concluido;
+    }
+
+    public boolean isIsValor2Concluido() {
+        return isValor2Concluido;
+    }
+
+    public boolean isIsValor3Concluido() {
+        return isValor3Concluido;
+    }
+
+    public void setIsValor1Concluido(boolean isValor1Concluido) {
+        this.isValor1Concluido = isValor1Concluido;
+    }
+
+    public void setIsValor2Concluido(boolean isValor2Concluido) {
+        this.isValor2Concluido = isValor2Concluido;
+    }
+
+    public void setIsValor3Concluido(boolean isValor3Concluido) {
+        this.isValor3Concluido = isValor3Concluido;
+    }
+
+    public IconGenerator getIconGenerator() {
+        return iconGenerator;
+    }
+
+    public JButton getBtnValor1() {
+        return btnValor1;
+    }
+
+    public JButton getBtnValor2() {
+        return btnValor2;
+    }
+
+    public JButton getBtnValor3() {
+        return btnValor3;
+    }
+
+    public void exibirPontuacao() {
+
+        jLabel2.setText(moeda + "");
+        jLabel4.setText(pontos + "");
+    }
+
+    public void habilitarBotoes(boolean habilitar) {
+
+        btnApostar.setEnabled(habilitar);
+        btnJogar.setEnabled(habilitar);
+        btnSair.setEnabled(habilitar);
+        btnValor1.setEnabled(habilitar);
 
     }
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnApostar;

@@ -19,7 +19,7 @@ public class Constantes {
     public static final String PATH_FILE_3 = "icons/img3r.png";
     public static final String PATH_FILE_4 = "icons/img4r.png";
     public static final String PATH_FILE_5 = "icons/img5r.png";
-    public static final String PATH_FILE_6 = "icons/img7r.png";
+    public static final String PATH_FILE_6 = "icons/img6r.png";
   
     public static final File FILE_0 = new File(PATH_FILE_0);
     public static final File FILE_1 = new File(PATH_FILE_1);
@@ -28,4 +28,7 @@ public class Constantes {
     public static final File FILE_4 = new File(PATH_FILE_4);
     public static final File FILE_5 = new File(PATH_FILE_5);
     public static final File FILE_6 = new File(PATH_FILE_6);
+    
+    
+    public static final int IMAGEM_INICIAL = 2;
 }
